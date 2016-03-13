@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>Cosmos-site by dpnemergut</title>
+  </head>
+
+  <body>
+    <div id="container">
+      <div class="inner">
+
+        <header>
+          <h1>Cosmos-site</h1>
+          <h2>Jekyll site for cosmos</h2>
+        </header>
+
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/dpnemergut/cosmos-site/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/dpnemergut/cosmos-site/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/dpnemergut/cosmos-site" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h1>
+<a id="cosmos" class="anchor" href="#cosmos" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>COSMOS++</h1>
+
+<p>COSMOS++ is a C++ codebase with a Python wrapper that can be compiled and run to generate astrophysical simulations on unstructured grids with local adaptive mesh refinement.</p>
+
+<p>Feel free to visit the project's website or repository page for more information.</p>
+
+<h2>
+<a id="compiling" class="anchor" href="#compiling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Compiling</h2>
+
+<p>COSMOS++ requires an MPI compiler for C++ such as <code>mpiCC</code> or <code>mpicxx</code> depending on the compile time environment.</p>
+
+<p>COSMOS++ can be compiled by running the Python wrapper script, <code>cosmos</code>, at the command line, as such</p>
+
+<pre><code>python cosmos main-problem nx ny nz output-dir
+</code></pre>
+
+<p>where</p>
+
+<pre><code>main-problem -&gt; name of the problem file to be run
+nx -&gt; (optional) number of processors dedicated to computing in the x dimension
+ny -&gt; (optional) number of processors dedicated to computing in the y dimension
+nz -&gt; (optional) number of processors dedicated to computing in the z dimension
+output-dir -&gt; (optional) name of the output directory (default: exe-dir)
+</code></pre>
+
+<p>Once COSMOS++ is compiled, it immediately begins running the simulation unless the <code>-c</code> flag is passed. All object files are stored in the <code>obj-xxx/</code> folder, where <code>xxx</code> is determined from the local architecture, and will only be regenerated if changes have been made that affect them. Thus, for a 'clean compile,' the <code>obj-desktop/</code> and <code>exe-dir/</code> directories must first be deleted (this is rarely needed), which can be accomplished with the <code>gmake clean</code> command.</p>
+
+<p>COSMOS++ recognizes the compile and runtime environments based on OS variables and copies the corresponding Makefile within the <code>Configure/</code> directory to the Makefile in the project root. If a specific Makefile cannot be found, the Python wrapper uses <code>make.desktop</code>. For personal systems, Mac environments will use <code>make.mac</code> and Linux environments will use the default <code>make.desktop</code>. There are also Makefiles for various clusters that COSMOS++ has previously been compiled on. If a particular cluster does not have a Makefile and it requires quite a bit of customization, please contribute the resulting Makefile to the repository.</p>
+
+<p>Each problem has its own main file containing that problem's configuration and initialization. A full list of them can be found within the <code>Main/</code> and <code>MainProjects/</code> directories in the repository. The main file that is specified at compile time is copied to <code>main.cc</code>, which is the file that is actually compiled for the simulation.</p>
+
+<h2>
+<a id="viewing-output" class="anchor" href="#viewing-output" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Viewing Output</h2>
+
+<p>The output of a simulation is contained in the <code>exe-dir</code> directory unless specified otherwise during compilation. It is intended to be viewed using visualization software such as VisIt. Other diagnostic files, such as <code>timings.dat</code> may also be contained within the output directory.</p>
+
+<h2>
+<a id="problem-development" class="anchor" href="#problem-development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Problem Development</h2>
+
+<p>Each problem has its own main file within <code>Main/</code> or <code>MainProjects/</code> and the file follows this general structure:</p>
+
+<ol>
+<li>Problem configuration (number of zones, stop time, dump intervals, method flags)</li>
+<li>Initialize MPI</li>
+<li>Create the mesh</li>
+<li>Initialize physics packages (primitive solver, HRSC/FEM)</li>
+<li>Set boundary conditions</li>
+<li>Prerefine the mesh (if applicable)</li>
+<li>Set initial data (problem specific)</li>
+<li>Register fields with solver</li>
+<li>Register output fields</li>
+<li>Advance solution
+If you wish to create a new main file, it is recommended that you copy an existing, working main file and edit it, as needed.</li>
+</ol>
+
+<h2>
+<a id="project-development" class="anchor" href="#project-development" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Project Development</h2>
+
+<h3>
+<a id="folder-structure" class="anchor" href="#folder-structure" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Folder Structure</h3>
+
+<p>Advect             Advection of all registered fields,
+                   options exist for consistent (or not) transport
+                   MeshVelocity functions are included in this class,
+                   as are artificial and molecular viscosity options.</p>
+
+<p>BC                 Boundary conditions.</p>
+
+<p>Configure          Includes all common and platform-specific make files
+                   and scripts (Make.physics) for the specification of
+                   package options (e.g., MPI, linearsolver, debug
+                   compilation, physics packages to compile).</p>
+
+<p>Cool               Assortment of various cooling functions.</p>
+
+<p>Documentation      Articles and text write-ups of the code,
+                   installation instructions, and general usage
+                   information. Includes Hypre, Visit, Perforce,
+                   Totalview, Linux, and Cosmos documentation.</p>
+
+<p>EOS                Equation of state base and inherited classes.</p>
+
+<p>Field              Responsible for registering all evolved fields, and
+                   computing gradients, averaging functions, particle
+                   and field exchanges across processors.</p>
+
+<p>LinearSolver       Includes Hypre, FFT, and other matrix solvers
+                   and interfaces.</p>
+
+<p>Main               Main decks for test problems.</p>
+
+<p>MainProjects       Main decks for actual production problems.</p>
+
+<p>Mesh               Includes the MPI, zone, mesh, particle, restart, and
+                   math abstraction (Tensor, Vector) classes.</p>
+
+<p>Metric             All metric classes defining the mesh types
+                   (e.g., cartesian, spherical, cylindrical
+                   Schwarzschild, Kerr, etc...).</p>
+
+<p>Network            Reactive networks.</p>
+
+<p>Opacity            Opacity base and inherited classes.</p>
+
+<p>Parts              Particle function classes (e.g. geodesics).</p>
+
+<p>Physics            Available physics packages.</p>
+
+<p>PhysicsHelper      Available physics package helpers (e.g., setting up
+                   complicated initial data, analytic code tests,
+                   etc...).</p>
+
+<p>PostProcess        Codes for post-processing and analyzing stored data
+                   after completion of runs.</p>
+
+<p>RegressionTests    Includes standard set of tests to be performed each
+                   time the code is modified before submission into
+                   the code depot. This ensures any newly submitted
+                   changes do not break the code.</p>
+
+<p>Scripts            Some useful scripts (e.g., batch submission)</p>
+
+<p>Utilities          Output dump objects, including time history, 1D line
+                   traces, and multi-D HDF5 for visualization (VisIt).
+                   Also includes random number generators, timer
+                   objects, gravitional wave extraction, mesh
+                   refinement, physical constants, and main driver of
+                   the code.</p>
+
+<h3>
+<a id="code-documentation" class="anchor" href="#code-documentation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Code Documentation</h3>
+
+<p>COSMOS++ uses Doxygen to compile code documentation. It must be installed before being able to compile. Here is how to install it on Debian:</p>
+
+<pre><code>sudo apt-get install doxygen doxygen-latex doxygen-doc doxygen-gui graphviz
+</code></pre>
+
+<p>The Doxygen configuration file is called <code>doxygen-config</code> and documentation can be generated by running</p>
+
+<pre><code>doxygen doxygen-config
+</code></pre>
+
+<p>in the repository root. This will create the directory <code>doxygen-docs/</code> in the project root. COSMOS++ is currently configured to generate both HTML and LaTeX documentation. Visit Doxygen's website for more information on how to document C++ with it.</p>
+
+<h3>
+<a id="performance-testing" class="anchor" href="#performance-testing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Performance Testing</h3>
+
+<p>For performance testing, objects of the class <code>Timer</code> can be registered in <code>Utilities/TimerList.hh</code>. Timers can be nested by creating and specifying a parent timer that will keep track of the total time its children have used. For example,</p>
+
+<pre><code>Timer TimeGetMagneticField("Get Magnetic Field");
+Timer TimeGetMagneticFieldOppZone("Get opposite zone", TimeGetMagneticField);
+Timer TimeGetMagneticFieldToFace("Projection onto face", TimeGetMagneticField);
+</code></pre>
+
+<p>will create two timers and their total time will be kept in the first. The timers must then be declared in the file they will be used in by adding <code>extern Timer TimerName;</code> to the file header. The timers can then be started and stopped by calling their <code>start()</code> and <code>stop()</code> methods. Here is how the previous example's timers would be used to time two blocks of code</p>
+
+<pre><code>TimeGetMagneticField.start();
+
+TimeGetMagneticFieldOppZone.start();
+code code code
+TimeGetMagneticFieldOppZone.stop();
+
+TimeGetMagneticFieldToFace.start();
+code code code
+TimeGetMagneticFieldToFace.stop();
+
+TimeGetMagneticField.stop();
+</code></pre>
+
+<p>After a simulation completes, the timings can be found in the file, <code>timings.dat</code>, contained within the output directory (default: <code>exe-dir/</code>).</p>
+
+<h3>
+<a id="regression-testing" class="anchor" href="#regression-testing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Regression Testing</h3>
+
+<p>Regression tests are contained within the <code>RegressionTests/</code> directory and can be run in the same manner as main files. The regression tests in COSMOS++ are typically additional main files that are known to be stable. When adding regression tests, please also add the filename to <code>listOfTests</code> that is within the same directory. The full suite of regression tests can be run using the command line</p>
+
+<pre><code>runRegressionTests
+</code></pre>
+        </section>
+
+        <footer>
+          Cosmos-site is maintained by <a href="https://github.com/dpnemergut">dpnemergut</a><br>
+          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
+    </div>
+  </body>
+</html>
